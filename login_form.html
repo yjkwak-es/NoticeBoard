@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko-kr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .loginForm {
+            text-align : center;
+            margin : 0 auto;
+            padding : 5% 0;
+        }
+    </style>
+    <title>Document</title>
+</head>
+<body>
+    <div class="loginForm">
+        <form method=post action="login.php">
+            <table class="loginForm">
+                <tbody>
+                    <tr>
+                        <td>아이디 </td>
+                        <td><input type="text" name="ID" size="10" maxlength="10"></td>
+                        <td rowspan = "2">
+                            <input type="submit" value="로그인">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>비밀번호 </td>
+                        <td><input type="password" name="PW" size="10" maxlength="10"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <button type="button" onclick="document.location='createMember_form.html'">회원가입</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</body>
+
+</html>

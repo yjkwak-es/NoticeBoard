@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko-kr">
+<head>
+    <style>
+        .loginForm {
+            text-align : center;
+            margin : 0 auto;
+            padding : 5% 0;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <title>Document</title>
+</head>
+<body>
+    <div class="loginForm">
+    <form method=post action="createMember.php">
+        <table class="loginForm">
+            <tr>
+                <td>아이디</td>
+                    <td><input type="text" id="ID" name="ID" size="10" maxlength="10">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    비밀번호 </td>
+                    <td><input type="password" name="PW" size="10" maxlength="10">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <input type="submit" value="회원가입하기">
+                </td>
+            </tr>
+        </table>
+    </div>
+    </form>
+    <script>
+        var replaceChar = /[~!@\#$%^&*\()\-=+_'\;<>0-9\/.\`:\"\\,\[\]?|{}]/gi;
+
+        $(document).ready(function() {
+            $("#ID").on("focusout", function() {
+                var x = $(this).val();
+                if (x.length > 0) {
+                    if (x.match(replaceChar)) {
+                        x = x.replace(replaceChar, "");
+                    }
+                    $(this).val(x);
+                }
+            }).on("keyup", function() {
+                $(this).val($(this).val().replace(replaceChar, ""));
+            });
+        })
+    </script>
+</body>
+</html>
