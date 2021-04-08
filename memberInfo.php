@@ -1,8 +1,9 @@
 <?php
-include "/ESGROUP/PHPSever/test/idCheck.php";
+include __DIR__ . "/idCheck.php";
 
 $result = $admin->getallMembers();
 ?>
+
 <!DOCTYPE html>
 <html lang="ko">
 
@@ -12,7 +13,8 @@ $result = $admin->getallMembers();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
-        table,td {
+        table,
+        td {
             text-align: center;
             border-collapse: collapse;
             border: 1px solid black;
@@ -39,8 +41,7 @@ $result = $admin->getallMembers();
             </tr>
         </thead>
         <tbody>
-            <?php
-            while ($row = mysqli_fetch_assoc($result)) : ?>
+            <? while ($row = mysqli_fetch_assoc($result)) : ?>
                 <tr>
                     <td><?= $row['PID'] ?></td>
                     <td><?= $row['ID'] ?></td>
@@ -48,9 +49,7 @@ $result = $admin->getallMembers();
                     <td><?= $row['age'] ?></td>
                     <td><?= $row['gender'] ?></td>
                 </tr>
-            <?php
-            endwhile;
-            ?>
+            <? endwhile; ?>
         </tbody>
     </table>
 </body>

@@ -1,28 +1,28 @@
 <?php
-include "/ESGROUP/PHPSever/test/idCheck.php";
-include "/ESGROUP/PHPSever/test/class/FileBoard.php";
+include __DIR__ . "/idCheck.php";
+include __DIR__ . "/class/FileBoard.php";
 
 $board = new FileBoard();
+?>
 
-if (empty($_POST['TID'])) : ?>
-    <script>
+<script>
+    <? if (empty($_POST['TID'])) : ?>
         alert('Error')
         history.go(-1);
-    </script>
-<?php
-endif;
-$result = $board->deletePost($_POST['TID']);
+    <? endif; ?>
+</script>
+
+<?
+$result = $board->deleteFilePost($_POST['TID']);
 $TID = $_POST['TID'];
-if ($result) : ?>
-    <script>
+?>
+
+<script>
+    <? if ($result) : ?>
         alert('Deleted!')
-        history.go(-1)
-    </script>
-<?php
-else : ?>
-    <script>
+        top.location.href = 'noticeBoard.php'
+    <? else : ?>
         alert('Deleted Failed!')
         history.go(-1)
-    </script>
-<?php 
-endif;
+    <? endif; ?>
+</script>

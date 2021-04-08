@@ -1,6 +1,6 @@
 <?php
-include_once "/ESGROUP/PHPSever/test/class/TextBoardinterface.php";
-include_once "/ESGROUP/PHPSever/test/class/Reply.php";
+include_once __DIR__ . "/TextBoardinterface.php";
+include_once __DIR__ . "/Reply.php";
 
 class TextBoard implements TextBoardInterface
 {
@@ -16,27 +16,21 @@ class TextBoard implements TextBoardInterface
         endif;
     }
 
-    public function __call($name, $args)
+    // public function __call($name, $args)
+    // {
+    //     switch ($name) {
+    //         case 'createPost':
+    //             return call_user_func_array(array($this, 'createTextPost'), $args);
+    //         case 'setPost':
+    //             return call_user_func_array(array($this, 'setTextPost'), $args);
+    //         case 'deletePost':
+    //             return call_user_func_array(array($this, 'deleteTextPost'), $args);
+    //     }
+    // }
+
+    public function createTextPost($ID, $Title, $Paragraph): bool
     {
-        switch ($name) {
-            case 'createPost':
-                return call_user_func_array(array($this, 'createTextPost'), $args);
-            case 'setPost':
-                return call_user_func_array(array($this, 'setTextPost'), $args);
-            case 'deletePost':
-                return call_user_func_array(array($this, 'deleteTextPost'), $args);
-        }
-    }
-
-    protected function createTextPost($ID, $Title, $Paragraph): bool
-    {
-        $query = "INSERT INTO board(ID,Title,Paragraph,FileID) VALUES(?,?,?,null)";
-        $stmt = mysqli_prepare($this->con, $query);
-
-        $bind = mysqli_stmt_bind_param($stmt, "sss", $ID, $Title, $Paragraph);
-        $exec = mysqli_stmt_execute($stmt);
-
-        return $exec;
+        return $this->createPost($ID, $Title, $Paragraph, '');
     }
 
     public function getPost(int $TID): array
@@ -47,9 +41,7 @@ class TextBoard implements TextBoardInterface
         $bind = mysqli_stmt_bind_param($stmt, "i", $TID);
         $exec = mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
-        $row = mysqli_fetch_assoc($result);
-
-        return $row;
+        return mysqli_fetch_assoc($result);
     }
 
     public function getallPosts(): mysqli_result
@@ -58,23 +50,15 @@ class TextBoard implements TextBoardInterface
         $stmt = mysqli_prepare($this->con, $query);
 
         $exec = mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-
-        return $result;
+        return mysqli_stmt_get_result($stmt);
     }
 
-    protected function setTextPost($TID, $Title, $Paragraph): bool
+    public function setTextPost(int $TID, string $Title, string $Paragraph): bool
     {
-        $query = "UPDATE board SET Title=?,Paragraph=? WHERE TID=?";
-        $stmt = mysqli_prepare($this->con, $query);
-
-        $bind = mysqli_stmt_bind_param($stmt, "ssi", $Title, $Paragraph, $TID);
-        $exec = mysqli_stmt_execute($stmt);
-
-        return $exec;
+        return $this->setPost($TID, $Title, $Paragraph, '');
     }
 
-    protected function deleteTextPost(int $TID): bool
+    public function deleteTextPost(int $TID): bool
     {
         $reply = new Reply();
         $reply->deleteAllReplyAtPosts($TID);
@@ -83,8 +67,7 @@ class TextBoard implements TextBoardInterface
         $stmt = mysqli_stmt_init($this->con);
         mysqli_stmt_prepare($stmt, $query);
         $bind = mysqli_stmt_bind_param($stmt, "i", $TID);
-        $exec = mysqli_stmt_execute($stmt);
-        return $exec;
+        return mysqli_stmt_execute($stmt);
     }
 
     public function searchPosts(string $keyword, string $Type = "Title"): mysqli_result
@@ -106,8 +89,32 @@ class TextBoard implements TextBoardInterface
         endif;
 
         $exec = mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
+        return mysqli_stmt_get_result($stmt);
+    }
 
-        return $result;
+    protected function createPost(string $ID, string $Title, string $Paragraph, string $FileID)
+    {
+        if(empty($FileID)) {
+            $FileID = null;
+        }
+
+        $query = "INSERT INTO board(ID,Title,Paragraph,FileID) VALUES(?,?,?,?)";
+        $stmt = mysqli_prepare($this->con, $query);
+
+        $bind = mysqli_stmt_bind_param($stmt, "ssss", $ID, $Title, $Paragraph, $FileID);
+        return mysqli_stmt_execute($stmt);
+    }
+
+    protected function setPost(int $TID, string $Title, string $Paragraph, string $FileID)
+    {
+        if(empty($FileID)) {
+            $FileID = null;
+        }
+        
+        $query = "UPDATE board SET Title=?,Paragraph=?,FileID=? WHERE TID=?";
+        $stmt = mysqli_prepare($this->con, $query);
+
+        $bind = mysqli_stmt_bind_param($stmt, "sssi", $Title, $Paragraph, $FileID, $TID);
+        return mysqli_stmt_execute($stmt);
     }
 }

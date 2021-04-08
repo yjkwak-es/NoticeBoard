@@ -1,20 +1,17 @@
 <?php
-include "/ESGROUP/PHPSever/test/class/FileBoard.php";
+include __DIR__ . "/class/FileBoard.php";
 $TID = $_POST['TID'];
 
 $board = new FileBoard();
-$ret = $board->deleteFile($TID);
+$ret = $board->clearFile($TID);
+?>
 
-if (!$ret) : ?>
-    <script>
+<script>
+    <? if (!$ret) : ?>
         alert("Delete error")
-        history.go(-1)
-    </script>
-<?php
-else : ?>
-    <script>
+    <? else : ?>
         alert("Deleted File!")
-        history.go(-1)
-    </script>
-<?php
-endif; ?>
+    <? endif; ?>
+    
+    history.go(-1)
+</script>

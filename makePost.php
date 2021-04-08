@@ -1,6 +1,6 @@
 <?php
-include "/ESGROUP/PHPSever/test/idCheck.php";
-include "/ESGROUP/PHPSever/test/class/TextBoard.php";
+include __DIR__ . "/idCheck.php";
+include __DIR__ . "/class/TextBoard.php";
 
 $board = new TextBoard();
 
@@ -8,23 +8,25 @@ $tid = "";
 $title = "";
 $paragraph = "text here";
 $FileID = "";
+?>
 
+<?
 if (!empty($_GET)) :
     $tid = $_GET['TID'];
-    $row = $board->getPost($tid);
+    $row = $board->getPost($tid); ?>
 
-    if ($row['ID'] !== $mem->getID()) : ?>
+    <? if ($row['ID'] !== $mem->getID()) : ?>
         <script>
             top.location.href = "makePost.php"
         </script>
-<?php
-        exit;
-    endif;
+    <? endif;
+
     $title = $row['Title'];
     $paragraph = $row['Paragraph'];
     $FileID = $row['FileID'];
 endif;
 ?>
+
 <!DOCTYPE html>
 <html lang="ko">
 
@@ -40,7 +42,6 @@ endif;
             border: none;
             outline: none;
         }
-        
     </style>
 </head>
 
@@ -66,16 +67,16 @@ endif;
                         <td colspan="2"> <textarea class="paragraph" name="Paragraph"><?= $paragraph ?></textarea></td>
                     </tr>
                     <tr>
-                        <?php
-                        if ($FileID == "") : ?>
-                            <td colspan="2"> <label for="upfile">첨부파일 : </label>
+                        <? if ($FileID == "") : ?>
+                            <td colspan="2">
+                                <label for="upfile">첨부파일 : </label>
                                 <input type="file" id="upfile" name="upfile">
                             </td>
-                        <?php
-                        endif; ?>
+                        <? endif; ?>
                     </tr>
                 </tbody>
             </table>
+
             <div style="text-align: right;">
                 <input type="submit" value="저장하기">
             </div>

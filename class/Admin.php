@@ -1,22 +1,22 @@
 <?php
 
-include_once "/ESGROUP/PHPSever/test/class/Member.php";
-include_once "/ESGROUP/PHPSever/test/class/AdminInterface.php";
+include_once __DIR__."/Member.php";
+include_once __DIR__."/AdminInterface.php";
 
 class Admin extends Member implements AdminInterface
 {
-    public function __call($name, $args)
-    {
-        switch ($name) {
-            case 'getMember':
-                switch (count($args)) {
-                    case 0:
-                        return call_user_func_array(array($this, 'getMemberMy'), $args);
-                    case 1:
-                        return call_user_func_array(array($this, 'getMemberID'), $args);
-                }
-        }
-    }
+    // public function __call($name, $args)
+    // {
+    //     switch ($name) {
+    //         case 'getMember':
+    //             switch (count($args)) {
+    //                 case 0:
+    //                     return call_user_func_array(array($this, 'getMemberMy'), $args);
+    //                 case 1:
+    //                     return call_user_func_array(array($this, 'getMemberID'), $args);
+    //             }
+    //     }
+    // }
 
     public function __construct()
     {
@@ -57,6 +57,7 @@ class Admin extends Member implements AdminInterface
         $exec = mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
         $row = $result->fetch_row();
+        
         if ($row[0] != 0) {
             return $result;
         }

@@ -1,5 +1,5 @@
 <?php
-include_once "/ESGROUP/PHPSever/test/class/MemberInterface.php";
+include_once __DIR__ . "/MemberInterface.php";
 
 class Member implements MemberInterface
 {
@@ -22,19 +22,6 @@ class Member implements MemberInterface
         return $this->getMember($this->id);
     }
 
-    protected function getMember($id)
-    {
-        $query = "SELECT * FROM test_db WHERE ID=?";
-        $stmt = mysqli_prepare($this->con, $query);
-
-        $bind = mysqli_stmt_bind_param($stmt, "s", $id);
-        $exec = mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        $row = mysqli_fetch_assoc($result);
-
-        return $row;
-    }
-
     public function setMember(string $name, int $age, string $gender)
     {
         $query = "UPDATE test_db SET name=?, age=?, gender=? WHERE ID=?";
@@ -53,5 +40,18 @@ class Member implements MemberInterface
     public function setID(string $id)
     {
         $this->id = $id;
+    }
+
+    protected function getMember($id)
+    {
+        $query = "SELECT * FROM test_db WHERE ID=?";
+        $stmt = mysqli_prepare($this->con, $query);
+
+        $bind = mysqli_stmt_bind_param($stmt, "s", $id);
+        $exec = mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $row = mysqli_fetch_assoc($result);
+
+        return $row;
     }
 }

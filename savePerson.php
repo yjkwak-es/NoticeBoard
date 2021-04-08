@@ -1,22 +1,18 @@
 <?php
-include_once "/ESGROUP/PHPSever/test/idCheck.php";
+include_once __DIR__ . "/idCheck.php";
+?>
 
-if (empty($_POST['name'])) : ?>
-    <script>
+<script>
+    <? if (empty($_POST['name'])) : ?>
         alert('None Name')
         history.go(-1)
-    </script>
-<?php
-    exit;
-endif;
+    <? endif; ?>
+</script>
 
-// $_SESSION['name'] = $_POST['name'];
-// $_SESSION['age'] = $_POST['age'];
-// $_SESSION['gender'] = $_POST['gender']; 
-
-$mem->setMember($_POST['name'],$_POST['age'],$_POST['gender']);
-
+<?
+$mem->setMember($_POST['name'], $_POST['age'], $_POST['gender']);
 ?>
+
 <script>
     alert('Saved!')
     window.opener.location.reload();

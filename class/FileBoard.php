@@ -1,106 +1,84 @@
 <?php
-include_once "/ESGROUP/PHPSever/test/class/TextBoard.php";
-include_once "/ESGROUP/PHPSever/test/class/FileBoardInterface.php";
+include_once  __DIR__ . "/TextBoard.php";
+include_once __DIR__ . "/FileBoardInterface.php";
 
 class FileBoard extends TextBoard implements FileBoardIneterface
 {
-    public function __call($name, $args)
+    // public function __call($name, $args)
+    // {
+    //     switch ($name) {
+    //         case 'createPost':
+    //             switch (count($args)) {
+    //                 case 3:
+    //                     return call_user_func_array(array($this, 'createTextPost'), $args);
+    //                 case 4:
+    //                     return call_user_func_array(array($this, 'createFilePost'), $args);
+    //             }
+    //         case 'setPost':
+    //             switch (count($args)) {
+    //                 case 3:
+    //                     return call_user_func_array(array($this, 'setTextPost'), $args);
+    //                 case 4:
+    //                     return call_user_func_array(array($this, 'setFilePost'), $args);
+    //             }
+    //         case 'deletePost':
+    //             return call_user_func_array(array($this, 'deleteFilePost'), $args);
+    //     }
+    // }
+
+    public function createFilePost(string $ID, string $Title, string $Paragraph, array $file): bool
     {
-        switch ($name) {
-            case 'createPost':
-                switch (count($args)) {
-                    case 3:
-                        return call_user_func_array(array($this, 'createTextPost'), $args);
-                    case 4:
-                        return call_user_func_array(array($this, 'createFilePost'), $args);
-                }
-            case 'setPost':
-                switch (count($args)) {
-                    case 3:
-                        return call_user_func_array(array($this, 'setTextPost'), $args);
-                    case 4:
-                        return call_user_func_array(array($this, 'setFilePost'), $args);
-                }
-            case 'deletePost':
-                return call_user_func_array(array($this, 'deleteFilePost'), $args);
+        $file_id = $this->uploadFile($file);
+
+        if ($file_id == false) :
+            return $this->createTextPost($ID, $Title, $Paragraph);
+        endif;
+
+        return $this->createPost($ID, $Title, $Paragraph, $file_id);
+    }
+
+    public function setFilePost(int $TID, string $Title, string $Paragraph, array $file): bool
+    {
+        $file_id = $this->uploadFile($file);
+
+        if ($file_id == false) :
+            $file_id = NULL;
+        endif;
+
+        return $this->setPost($TID, $Title, $Paragraph, $file_id);
+    }
+
+    public function deleteFilePost(int $TID): bool
+    {
+        $fileResult = $this->getPost($TID);
+        $exec = $this->deleteTextPost($TID);
+
+        if (isset($fileResult['FileID'])) :
+            $exec = $this->deleteFile($fileResult['FileID']);
+        endif;
+
+        return $exec;
+    }
+
+    public function clearFile(int $TID): bool
+    {
+        $fileResult = $this->getPost($TID);
+        if (isset($fileResult['FileID'])) :
+            $this->setPost($TID, $fileResult['Title'], $fileResult['Paragraph'], '');
+
+            return $this->deleteFile($fileResult['FileID']);
+        endif;
+
+        return true;
+    }
+
+    public function downloadFile(string $FileID): bool
+    {
+        $row = $this->getFile($FileID);
+
+        if (!isset($row)) {
+            return false;
         }
-    }
-
-    protected function createFilePost(string $ID, string $Title, string $Paragraph, array $file): bool
-    {
-        $file_id = $this->uploadFile($file);
-
-        if ($file_id == false) :
-            $file_id = NULL;
-        endif;
-
-        $query = "INSERT INTO board(ID,Title,Paragraph,FileID) VALUES(?,?,?,?)";
-        $stmt = mysqli_stmt_init($this->con);
-        mysqli_stmt_prepare($stmt, $query);
-
-        $bind = mysqli_stmt_bind_param($stmt, "ssss", $ID, $Title, $Paragraph, $file_id);
-        $exec = mysqli_stmt_execute($stmt);
-
-        return $exec;
-    }
-
-    protected function setFilePost(int $TID, string $Title, string $Paragraph, array $file): bool
-    {
-        $file_id = $this->uploadFile($file);
-
-        if ($file_id == false) :
-            $file_id = NULL;
-        endif;
-
-        $query = "UPDATE board SET Title=?,Paragraph=?,FileID=? WHERE TID=?";
-        $stmt = mysqli_prepare($this->con, $query);
-
-        $bind = mysqli_stmt_bind_param($stmt, "sssi", $Title, $Paragraph, $file_id, $TID);
-        $exec = mysqli_stmt_execute($stmt);
-
-        return $exec;
-    }
-
-    protected function deleteFilePost(int $TID): bool
-    {
-        $fileResult = $this->getPost($TID);
-        $exec = parent::deleteTextPost($TID);
-
-        if (isset($fileResult['FileID'])) :
-            $exec = $this->clearFile($fileResult['FileID']);
-        endif;
-
-        return $exec;
-    }
-
-    public function deleteFile(int $TID): bool
-    {
-        $fileResult = $this->getPost($TID);
-        $exec = true;
-
-        if (isset($fileResult['FileID'])) :
-            $query = "UPDATE board SET FileID = NULL WHERE TID=?";
-            $stmt = mysqli_stmt_init($this->con);
-            mysqli_stmt_prepare($stmt, $query);
-            $bind = mysqli_stmt_bind_param($stmt, "i", $TID);
-            $exec = mysqli_stmt_execute($stmt);
-
-            $exec = $this->clearFile($fileResult['FileID']);
-        endif;
-
-        return $exec;
-    }
-
-    public function downloadFile(string $FileID)
-    {
-        $query = "SELECT * FROM file WHERE FileID = ?";
-        $stmt = mysqli_prepare($this->con, $query);
-
-        $bind = mysqli_stmt_bind_param($stmt, "s", $file_id);
-        $exec = mysqli_stmt_execute($stmt);
-
-        $result = mysqli_stmt_get_result($stmt);
-        $row = mysqli_fetch_assoc($result);
 
         $name_orig = $row['name_orig'];
         $name_save = $row['name_save'];
@@ -116,33 +94,25 @@ class FileBoard extends TextBoard implements FileBoardIneterface
 
         $fh = fopen($path, "r");
         fpassthru($fh);
+
+        return true;
     }
 
-    public function getFileName(string $FileID): string
+    public function getFile(string $FileID): array
     {
-        $query = "SELECT name_orig FROM file WHERE FileID=?";
+        $query = "SELECT * FROM file WHERE FileID = ?";
         $stmt = mysqli_prepare($this->con, $query);
 
         $bind = mysqli_stmt_bind_param($stmt, "s", $FileID);
         $exec = mysqli_stmt_execute($stmt);
+
         $result = mysqli_stmt_get_result($stmt);
-
-        if (mysqli_num_rows($result) == 0) :
-            return false;
-        endif;
-
-        $row = mysqli_fetch_assoc($result);
-        return $row['name_orig'];
+        return mysqli_fetch_assoc($result);
     }
 
-    private function clearFile(string $FileID)
+    private function deleteFile(string $FileID): bool
     {
-        $query = "SELECT * FROM file WHERE FileID= ?";
-        $stmt = mysqli_prepare($this->con, $query);
-        $bind = mysqli_stmt_bind_param($stmt, "s", $FileID);
-        $exec = mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        $row = mysqli_fetch_assoc($result);
+        $row = $this->getFile($FileID);
 
         $uploads_dir = 'uploads/';
         unlink($uploads_dir . $row['name_save']);
@@ -151,14 +121,12 @@ class FileBoard extends TextBoard implements FileBoardIneterface
         $stmt = mysqli_stmt_init($this->con);
         mysqli_stmt_prepare($stmt, $query);
         $bind = mysqli_stmt_bind_param($stmt, "s", $FileID);
-        $exec = mysqli_stmt_execute($stmt);
-
-        return $exec;
+        return mysqli_stmt_execute($stmt);
     }
 
     private function uploadFile(array $file)
     {
-        if (!isset($file)) :
+        if (empty($file)) :
             return false;
         endif;
 

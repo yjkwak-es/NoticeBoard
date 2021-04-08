@@ -1,7 +1,7 @@
 <?php
-include_once "/ESGROUP/PHPSever/test/idCheck.php";
+include_once __DIR__ . "/idCheck.php";
 
-$row = $mem->getMember();
+$row = $mem->getMemberMy();
 $name = isset($row['name']) ? $row['name'] : "";
 $age = isset($row['age']) ? $row['age'] : "";
 ?>
@@ -27,15 +27,19 @@ $age = isset($row['age']) ? $row['age'] : "";
         <div>
             <span> 이름 </span> <input type="text" id="name" name="name" autocomplete="off" value=<?= $name ?>>
         </div>
+
         <div>
             <span> 나이 </span> <input type="text" id="age" name="age" autocomplete="off" value=<?= $age ?>>
         </div>
+
         <div>
             <label for="male">Male</label>
             <input type="radio" name="gender" id="male" value="M">
+
             <label for="female">Female</label>
             <input type="radio" name="gender" id="female" value="F">
         </div>
+
         <div>
             <input type="submit" value="저장">
         </div>
@@ -75,21 +79,15 @@ $age = isset($row['age']) ? $row['age'] : "";
         });
     </script>
 
-    <?php
-    if (isset($row['gender'])) :
-        if ($row['gender'] === 'M') : ?>
-            <script>
+    <script>
+        <? if (isset($row['gender'])) : ?>
+            <? if ($row['gender'] === 'M') : ?>
                 document.getElementById('male').checked = true;
-            </script>
-        <?php
-        else : ?>
-            <script>
+            <? else : ?>
                 document.getElementById('female').checked = true;
-            </script>
-    <?php
-        endif;
-    endif;
-    ?>
+            <? endif; ?>
+        <? endif; ?>
+    </script>
 </body>
 
 </html>

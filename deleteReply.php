@@ -1,28 +1,23 @@
 <?php
-include "/ESGROUP/PHPSever/test/class/Reply.php";
+include __DIR__ . "/class/Reply.php";
 $RID = $_POST['RID'];
+?>
 
-if (empty($_POST['RID'])) : ?>
-    <script>
+<script>
+    <? if (empty($_POST['RID'])) : ?>
         alert('error : reply delete')
         history.go(-1)
-    </script>
-<?php
-endif;
+    <? endif; ?>
 
-$reply = new Reply();
-$result = $reply->deleteReply($RID);
+    <?
+    $reply = new Reply();
+    $result = $reply->deleteReply($RID);
+    ?>
 
-if ($result) : ?>
-    <script>
+    <? if ($result) : ?>
         alert('Reply Deleted!')
-        history.go(-1)
-    </script>
-<?php
-else : ?>
-    <script>
+    <? else : ?>
         alert('error : reply delete')
-        history.go(-1)
-    </script>
-<?php
-endif;
+    <? endif; ?>
+    history.go(-1)
+</script>

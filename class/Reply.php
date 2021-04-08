@@ -1,5 +1,5 @@
 <?php
-include_once "/ESGROUP/PHPSever/test/class/ReplyInterface.php";
+include_once __DIR__."/ReplyInterface.php";
 
 class Reply implements ReplyInterface
 {
@@ -23,9 +23,8 @@ class Reply implements ReplyInterface
         $bind = mysqli_stmt_bind_param($stmt, "i", $RID);
         $exec = mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
-        $row = mysqli_fetch_assoc($result);
-
-        return $row;
+        
+        return mysqli_fetch_assoc($result);
     }
 
     public function setReply($RID, $Paragraph): bool
@@ -34,9 +33,7 @@ class Reply implements ReplyInterface
         $stmt = mysqli_prepare($this->con, $query);
 
         $bind = mysqli_stmt_bind_param($stmt, "si", $Paragraph, $RID);
-        $exec = mysqli_stmt_execute($stmt);
-
-        return $exec;
+        return mysqli_stmt_execute($stmt);
     }
 
     public function getallReplysAtPost($TID): mysqli_result
@@ -46,9 +43,7 @@ class Reply implements ReplyInterface
 
         $bind = mysqli_stmt_bind_param($stmt, "i", $TID);
         $exec = mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-
-        return $result;
+        return mysqli_stmt_get_result($stmt);
     }
 
     public function createReply($TID, $ID, $Paragraph): bool
@@ -57,9 +52,7 @@ class Reply implements ReplyInterface
         $stmt = mysqli_prepare($this->con, $query);
 
         $bind = mysqli_stmt_bind_param($stmt, "iss", $TID, $ID, $Paragraph);
-        $exec = mysqli_stmt_execute($stmt);
-
-        return $exec;
+        return mysqli_stmt_execute($stmt);
     }
 
     public function deleteReply($RID): bool
@@ -68,9 +61,7 @@ class Reply implements ReplyInterface
         $stmt = mysqli_prepare($this->con, $query);
 
         $bind = mysqli_stmt_bind_param($stmt, "i", $RID);
-        $exec = mysqli_stmt_execute($stmt);
-
-        return $exec;
+        return mysqli_stmt_execute($stmt);
     }
 
     public function deleteAllReplyAtPosts($TID): bool
@@ -79,8 +70,6 @@ class Reply implements ReplyInterface
         $stmt = mysqli_prepare($this->con, $query);
 
         $bind = mysqli_stmt_bind_param($stmt, "i", $TID);
-        $exec = mysqli_stmt_execute($stmt);
-
-        return $exec;
+        return mysqli_stmt_execute($stmt);
     }
 }

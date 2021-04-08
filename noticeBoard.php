@@ -1,8 +1,9 @@
 <?php
-include "/ESGROUP/PHPSever/test/idCheck.php";
-include "/ESGROUP/PHPSever/test/class/FileBoard.php";
+include __DIR__."/idCheck.php";
+include __DIR__."/class/FileBoard.php";
 
 $board = new FileBoard();
+$memberInfo = $mem->getMemberMy();
 
 define("PAGESIZE", 3); //Number of Posts in 1 page
 define("PAGEDIV", 3); //Number of pages in 1 Division
@@ -15,30 +16,33 @@ endif;
 
 $q = "";
 $opt = "";
+?>
 
-if (isset($_GET['q'])) :
+<? if (isset($_GET['q'])) :
     $q = $_GET['q'];
     $opt = $_GET['opt'];
     $posts = $board->searchPosts($q, $opt);
+    
     if(mysqli_num_rows($posts) == 0) :?>
         <script>
             alert("no posts!")
             history.go(-1)
         </script>
-    <?php
-    endif;
+    <? endif;
+    
     $url = "noticeBoard.php?opt=" . $_GET['opt'] . "&q=" . $_GET['q'] . "&";
 else :
     $posts = $board->getallPosts();
     $url = "noticeBoard.php?";
-endif;
+endif; ?>
 
-if($mem->getID() === $admin->getID()) :
+<? if($mem->getID() === $admin->getID()) :
     $popup = "memberInfo.php";
 else :
     $popup = "setPerson.php";
-endif;
+endif; ?>
 
+<?
 $pageCnt = mysqli_num_rows($posts);
 $pageCnt = $pageCnt % PAGESIZE == 0 ? $pageCnt / PAGESIZE : (int)($pageCnt / PAGESIZE) + 1; // Number of Pages
 $page = $page > $pageCnt ? $pageCnt : $page; //Out of range
@@ -52,8 +56,10 @@ $divEnd = $divEnd > $pageCnt ?  $pageCnt : $divEnd; //Find div Ending page
 $postNum = mysqli_num_rows($posts) - PAGESIZE * ($page - 1); //Post Number`s start value
 
 for ($i = 0; $i < ($page - 1) * PAGESIZE; $i++) {
-    $row = mysqli_fetch_array($posts);
+    $row = mysqli_fetch_assoc($posts);
 }
+
+$pagePoint = 0;
 ?>
 
 <!DOCTYPE html>
@@ -65,6 +71,7 @@ for ($i = 0; $i < ($page - 1) * PAGESIZE; $i++) {
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    
     <script>
         //상세정보 저장용 팝업
         function popup() {
@@ -76,22 +83,18 @@ for ($i = 0; $i < ($page - 1) * PAGESIZE; $i++) {
 
 <body>
     <div style="text-align: right;">
-        <?php
-        $memberInfo = $mem->getMember();
-        if (!empty($memberInfo['name'])) :
-        ?>
+        <? if (!empty($memberInfo['name'])) : ?>
             <span>접속자 : </span><a href="javascript:popup()"><?= $memberInfo['name'] ?></a>
-        <?php
-        else :
-        ?>
+        <? else : ?>
             <span>현재 ID : </span><a href="javascript:popup()"><?= $mem->getID() ?></a>
-        <?php
-        endif; ?>
-        <span><button onclick="location.href='logout.php'">로그아웃</button></span>
+        <? endif; ?>
+        <span> <button onclick="location.href='logout.php'">로그아웃</button> </span>
     </div>
+
     <div style="text-align: center;">
         <a href="noticeBoard.php">초기화</a>
     </div>
+
     <div class="board">
         <table>
             <caption style="display: none;">게시판</caption>
@@ -110,31 +113,26 @@ for ($i = 0; $i < ($page - 1) * PAGESIZE; $i++) {
                 </tr>
             </thead>
             <tbody>
-                <?php
-                $pagePoint = 0;
-                // 게시글 목록
-                while ($row = mysqli_fetch_assoc($posts)) :
-                    if ($pagePoint == PAGESIZE) :
-                        break;
-                    endif;
-                    $pagePoint++;
-                ?>
+            <!-- 게시글 목록 -->
+                <? while (($row = mysqli_fetch_assoc($posts)) && ($pagePoint++ != PAGESIZE)) :?>
                     <tr>
                         <td><?= $postNum-- ?></td>
                         <td style="text-align: left;">
                             <a href="viewPost.php?TID=<?= $row['TID'] ?>"><?= $row['Title'] ?></a>
+                            
                             <!-- admin계정 글삭제 -->
-                            <?php if ($mem->getID() === $admin->getID()) : ?>
+                            <? if ($mem->getID() === $admin->getID()) : ?>
                                 <form action="deletePost.php" method='post' style="display:inline">
                                     <input type="hidden" name="TID" value=<?= $row['TID'] ?>>
                                     <input type="submit" value="삭제">
                                 </form>
-                            <?php endif; ?>
+                            <? endif; ?>
+
                         </td>
                         <td><?= $row['ID'] ?></td>
                         <td><?= $row['CreatedDate'] ?></td>
                     </tr>
-                <?php endwhile; ?>
+                <? endwhile; ?>
             </tbody>
         </table>
     </div>
@@ -170,17 +168,16 @@ for ($i = 0; $i < ($page - 1) * PAGESIZE; $i++) {
     <!-- 페이징 -->
     <div class="page">
         <a href="<?= $url ?>page=<?= $page - 1 ?>"><-</a>
-                <?php
-                for ($i = $divStart; $i <= $divEnd; $i++) :
-                    if ($i == $page) : ?>
-                        <a href="<?= $url ?>page=<?= $i ?>" style="color:red"><?= $i ?></a>
-                    <?php
-                    else : ?>
-                        <a href="<?= $url ?>page=<?= $i ?>"><?= $i ?></a>
-                <?php
-                    endif;
-                endfor; ?>
-                <a href="<?= $url ?>page=<?= $page + 1 ?>">-></a>
+
+        <? for ($i = $divStart; $i <= $divEnd; $i++) : ?>
+            <? if ($i == $page) : ?>
+                 <a href="<?= $url ?>page=<?= $i ?>" style="color:red"><?= $i ?></a>
+            <? else : ?>
+                <a href="<?= $url ?>page=<?= $i ?>"><?= $i ?></a>
+            <? endif; ?>
+        <? endfor; ?>
+        
+        <a href="<?= $url ?>page=<?= $page + 1 ?>">-></a>
     </div>
 </body>
 
