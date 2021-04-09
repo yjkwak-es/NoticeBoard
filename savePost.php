@@ -18,6 +18,10 @@ $Paragraph = $_POST['Paragraph'];
 </script>
 
 <?
+if((empty($Title)) || (empty($Paragraph))) {
+    exit;
+}
+
 $Title = addslashes($Title);
 $Paragraph = addslashes($Paragraph);
 

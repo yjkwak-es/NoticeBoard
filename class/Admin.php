@@ -5,19 +5,6 @@ include_once __DIR__."/AdminInterface.php";
 
 class Admin extends Member implements AdminInterface
 {
-    // public function __call($name, $args)
-    // {
-    //     switch ($name) {
-    //         case 'getMember':
-    //             switch (count($args)) {
-    //                 case 0:
-    //                     return call_user_func_array(array($this, 'getMemberMy'), $args);
-    //                 case 1:
-    //                     return call_user_func_array(array($this, 'getMemberID'), $args);
-    //             }
-    //     }
-    // }
-
     public function __construct()
     {
         parent::__construct();
@@ -43,12 +30,12 @@ class Admin extends Member implements AdminInterface
         return $result;
     }
 
-    public function getMemberID($id)
+    public function getMemberID(string $id) : array
     {
         return $this->getMember($id);
     }
 
-    public function createMember($id, $pw)
+    public function createMember(string $id, string $pw) : bool
     {
         $query = "SELECT COUNT(*) FROM test_db WHERE ID = ?";
         $stmt = mysqli_prepare($this->con, $query);
@@ -59,7 +46,7 @@ class Admin extends Member implements AdminInterface
         $row = $result->fetch_row();
         
         if ($row[0] != 0) {
-            return $result;
+            return false;
         }
 
         $query = "INSERT INTO test_db(ID,PW,admin) VALUES(?,?,0)";

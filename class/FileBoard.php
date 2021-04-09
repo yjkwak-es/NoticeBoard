@@ -4,79 +4,47 @@ include_once __DIR__ . "/FileBoardInterface.php";
 
 class FileBoard extends TextBoard implements FileBoardIneterface
 {
-    // public function __call($name, $args)
-    // {
-    //     switch ($name) {
-    //         case 'createPost':
-    //             switch (count($args)) {
-    //                 case 3:
-    //                     return call_user_func_array(array($this, 'createTextPost'), $args);
-    //                 case 4:
-    //                     return call_user_func_array(array($this, 'createFilePost'), $args);
-    //             }
-    //         case 'setPost':
-    //             switch (count($args)) {
-    //                 case 3:
-    //                     return call_user_func_array(array($this, 'setTextPost'), $args);
-    //                 case 4:
-    //                     return call_user_func_array(array($this, 'setFilePost'), $args);
-    //             }
-    //         case 'deletePost':
-    //             return call_user_func_array(array($this, 'deleteFilePost'), $args);
-    //     }
-    // }
-
     public function createFilePost(string $ID, string $Title, string $Paragraph, array $file): bool
     {
         $file_id = $this->uploadFile($file);
-
-        if ($file_id == false) :
-            return $this->createTextPost($ID, $Title, $Paragraph);
-        endif;
-
         return $this->createPost($ID, $Title, $Paragraph, $file_id);
     }
 
     public function setFilePost(int $TID, string $Title, string $Paragraph, array $file): bool
     {
         $file_id = $this->uploadFile($file);
-
-        if ($file_id == false) :
-            $file_id = NULL;
-        endif;
-
         return $this->setPost($TID, $Title, $Paragraph, $file_id);
     }
 
     public function deleteFilePost(int $TID): bool
     {
         $fileResult = $this->getPost($TID);
-        $exec = $this->deleteTextPost($TID);
+        $execPost = $this->deleteTextPost($TID);
 
-        if (isset($fileResult['FileID'])) :
-            $exec = $this->deleteFile($fileResult['FileID']);
+        if (!empty($fileResult['FileID'])) :
+            $execFile = $this->deleteFile($fileResult['FileID']);
         endif;
 
-        return $exec;
+        return $execPost && $execFile;
     }
 
     public function clearFile(int $TID): bool
     {
         $fileResult = $this->getPost($TID);
-        if (isset($fileResult['FileID'])) :
-            $this->setPost($TID, $fileResult['Title'], $fileResult['Paragraph'], '');
-
-            return $this->deleteFile($fileResult['FileID']);
+        
+        if (empty($fileResult['FileID'])) :
+            return true;
         endif;
-
-        return true;
+        
+        $this->setPost($TID, $fileResult['Title'], $fileResult['Paragraph'], '');
+        return $this->deleteFile($fileResult['FileID']);
     }
 
     public function downloadFile(string $FileID): bool
     {
         $row = $this->getFile($FileID);
 
-        if (!isset($row)) {
+        if (empty($row)) {
             return false;
         }
 
@@ -124,10 +92,10 @@ class FileBoard extends TextBoard implements FileBoardIneterface
         return mysqli_stmt_execute($stmt);
     }
 
-    private function uploadFile(array $file)
+    private function uploadFile(array $file): string
     {
         if (empty($file)) :
-            return false;
+            return NULL;
         endif;
 
         $uploads_dir = 'uploads/';
@@ -138,7 +106,7 @@ class FileBoard extends TextBoard implements FileBoardIneterface
         $ext = substr($file['name'], strrpos($file['name'], '.') + 1);
 
         if ((!in_array($ext, $allowed_ext)) || ($file['size'] >= $max_file_size)) :
-            return false;
+            return NULL;
         endif;
 
         $path = md5(microtime()) . '.' . $ext;
@@ -154,7 +122,7 @@ class FileBoard extends TextBoard implements FileBoardIneterface
             $exec = mysqli_stmt_execute($stmt);
 
             if (!$exec) :
-                return false;
+                return NULL;
             endif;
         endif;
 

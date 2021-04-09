@@ -2,6 +2,6 @@
 interface AdminInterface
 {
     function getallMembers();
-    function getMemberID($id);
-    function createMember($id, $pw);
+    function getMemberID(string $id);
+    function createMember(string $id, string $pw);
 }

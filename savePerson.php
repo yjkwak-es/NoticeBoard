@@ -2,12 +2,13 @@
 include_once __DIR__ . "/idCheck.php";
 ?>
 
-<script>
-    <? if (empty($_POST['name'])) : ?>
+<? if (empty($_POST['name'])) : ?>
+    <script>
         alert('None Name')
         history.go(-1)
-    <? endif; ?>
-</script>
+    </script>
+    <? exit; ?>
+<? endif; ?>
 
 <?
 $mem->setMember($_POST['name'], $_POST['age'], $_POST['gender']);

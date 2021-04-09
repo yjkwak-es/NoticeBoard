@@ -15,8 +15,6 @@ table {
 
 textarea {
     resize : none;
-    border : none;
-    outline : none;
 }
 
 span {
@@ -60,6 +58,11 @@ a:visited {
 .right {
     font-size: 20px;
     text-align: right;
+}
+
+.paragraph {
+    border : none;
+    outline : none;
 }
 
 #updateReply {

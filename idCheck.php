@@ -11,12 +11,7 @@ session_start();
 </script>
 
 <?
-$admin = new admin();
+$admin = new Admin();
 
-if ($_SESSION['ID'] === $admin->getID()) :
-    $mem = $admin;
-else :
-    $mem = new member();
-    $mem->setID($_SESSION['ID']);
-endif;
+$mem = $_SESSION['ID'] === $admin->getID() ? $admin : new Member($_SESSION['ID']);
 ?>

@@ -16,18 +16,21 @@ $Parent = $_POST['Parent']; //댓글이 달린 게시글 번호
     <? if (empty($Parent)) : ?>
         alert('Can`t read Post')
         history.go(-1)
-    <? endif ?>
+    <? endif; ?>
 </script>
 
 <?
+if((empty($Paragraph)) || (empty($Parent))) {
+    exit;
+}
+
 $Paragraph = addslashes($Paragraph); //특수문자 입력처리
 
 if (isset($_POST['RID'])) :
     $RID = $_POST['RID']; //수정 댓글일 경우 RID 또한 전송 받음
     $result = $reply->setReply($RID, $Paragraph);
 else :
-    $id = $mem->getID();
-    $result = $reply->createReply($Parent, $id, $Paragraph);
+    $result = $reply->createReply($Parent, $mem->getID(), $Paragraph);
 endif;
 ?>
 

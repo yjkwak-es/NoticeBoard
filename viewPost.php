@@ -20,48 +20,8 @@ $replyResult = $reply->getallReplysAtPost($row['TID']);
 $replyRow = mysqli_fetch_all($replyResult, MYSQLI_ASSOC);
 ?>
 
-<!-- 댓글 수정 시 사용할 form 동적 생성 -->
-<script>
-    $(".updateBtn").click(function() {
-        var RID = $(this).attr('id');
-
-        var tr = $(this).parent().parent();
-        var td = tr.children();
-
-        var Paragraph = td.eq[1].innerHTML();
-        var Parent = new RegExp('[\?&]' + 'TID' + '=([^&#]*)').exec(window.location.href);
-
-        var newForm = $('<form></form>');
-
-        newForm.attr("method", "post");
-        newForm.attr("action", "SaveReply.php");
-
-        newForm.append($('textarea'), {
-            style: 'width : 100%; height : 100%',
-            name: 'Paragraph',
-            value: Paragraph
-        });
-        newForm.append($('input'), {
-            type: 'hidden',
-            name: 'RID',
-            value: RID
-        });
-        newForm.append($('input'), {
-            type: 'hidden',
-            name: 'Parent',
-            value: Parent
-        });
-        newForm.append($('input'), {
-            type: 'submit',
-            value: '수정완료'
-        });
-
-        newForm.appendTo(td.eq[1]);
-    })
-</script>
-
 <!DOCTYPE html>
-<html lang="ko-kr">
+<html lang="ko">
 
 <head>
     <link rel="stylesheet" href="Board.css" type="text/css">
@@ -76,7 +36,7 @@ $replyRow = mysqli_fetch_all($replyResult, MYSQLI_ASSOC);
     <div class="right">
         현재 ID : <?= $mem->getID() ?>
     </div>
-    
+
     <!-- 본인 게시글 삭제 및 수정 -->
     <div class="board">
         <? if ($mem->getID() === $row['ID']) : ?>
@@ -163,55 +123,58 @@ $replyRow = mysqli_fetch_all($replyResult, MYSQLI_ASSOC);
         <div style="text-align:right;">
             <form action="saveReply.php" name="Reply" method="Post">
                 <input type="hidden" name="Parent" value=<?= $TID ?>>
-                <textarea name="Paragraph" style="width : 100%; margin-top : 5px;white-space:pre-wrap; outline :black; border:black;"></textarea>
+                <textarea name="Paragraph" style="width : 100%; margin-top : 5px;white-space:pre-wrap;"></textarea>
                 <input type="submit" value="답글달기">
             </form>
         </div>
     </div>
 </body>
 
+<!-- 댓글 수정 시 사용할 form 동적 생성 -->
 <script>
-    // function makeUpdate(rowNum, RID, Parent) {
-    //     var replyTable = document.getElementById("replyTable");
-    //     var inner = replyTable.rows[rowNum].cells[1].innerHTML;
-    //     inner = inner.replace(/<\s*\/?br\s*[\/]?>/gi, "");
+    $(".updateBtn").click(function() {
+        var Btn = $(this);
+        var RID = Btn.attr('id');
 
-    //     var form = document.createElement("form");
+        var tr = Btn.parent().parent();
+        var td = tr.children();
 
-    //     form.setAttribute("charset", "UTF-8");
-    //     form.setAttribute("method", "Post");
-    //     form.setAttribute("action", "SaveReply.php");
-    //     form.setAttribute("id", rowNum);
+        var Paragraph = td.eq(1).text();
+        td.eq(1).html('');
 
-    //     var inputField = document.createElement("textarea");
-    //     inputField.setAttribute("style", "width : 100%;height : 100%;");
-    //     inputField.setAttribute("name", "Paragraph");
-    //     inputField.innerHTML = inner;
-    //     form.appendChild(inputField);
-    //     replyTable.rows[rowNum].cells[1].innerHTML = " ";
+        var Parent = new RegExp('[\?&]' + 'TID' + '=([^&#]*)').exec(window.location.href);
 
-    //     var hiddenTID = document.createElement("input");
-    //     hiddenTID.setAttribute("type", "hidden");
-    //     hiddenTID.setAttribute("name", "RID");
-    //     hiddenTID.setAttribute("value", RID);
-    //     form.appendChild(hiddenTID);
+        var newForm = $('<form></form>');
 
-    //     var hiddenParent = document.createElement("input");
-    //     hiddenParent.setAttribute("type", "hidden");
-    //     hiddenParent.setAttribute("name", "Parent");
-    //     hiddenParent.setAttribute("value", Parent);
-    //     form.appendChild(hiddenParent);
+        newForm.attr("method", "post");
+        newForm.attr("action", "SaveReply.php");
 
-    //     var submitbtn = document.createElement("input");
-    //     submitbtn.setAttribute("type", "submit");
-    //     submitbtn.setAttribute("value", "수정완료");
-    //     form.appendChild(submitbtn);
+        newForm.append($('<textarea>', {
+            css: {
+                width: "100%",
+                height: "100%"
+            },
+            name: 'Paragraph',
+            id: 'updateP',
+        }));
+        newForm.append($('<input/>', {
+            type: 'hidden',
+            name: 'RID',
+            value: RID
+        }));
+        newForm.append($('<input/>', {
+            type: 'hidden',
+            name: 'Parent',
+            value: Parent[1]
+        }));
+        newForm.append($('<input/>', {
+            type: 'submit',
+            value: '수정완료'
+        }));
 
-    //     replyTable.rows[rowNum].cells[1].appendChild(form);
-
-    //     var btn = document.getElementById("updateBtn" + rowNum);
-    //     btn.setAttribute("onclick", "");
-    // }
+        newForm.appendTo(td.eq(1));
+        $('#updateP').text(Paragraph);
+    })
 </script>
 
 </html>

@@ -1,6 +1,6 @@
 <?php
-include __DIR__."/idCheck.php";
-include __DIR__."/class/FileBoard.php";
+include __DIR__ . "/idCheck.php";
+include __DIR__ . "/class/FileBoard.php";
 
 $board = new FileBoard();
 $memberInfo = $mem->getMemberMy();
@@ -18,48 +18,44 @@ $q = "";
 $opt = "";
 ?>
 
-<? if (isset($_GET['q'])) :
+<? 
+if (isset($_GET['q'])) :
     $q = $_GET['q'];
     $opt = $_GET['opt'];
-    $posts = $board->searchPosts($q, $opt);
-    
-    if(mysqli_num_rows($posts) == 0) :?>
-        <script>
-            alert("no posts!")
-            history.go(-1)
-        </script>
-    <? endif;
-    
-    $url = "noticeBoard.php?opt=" . $_GET['opt'] . "&q=" . $_GET['q'] . "&";
+    $url = "noticeBoard.php?opt=" . $opt . "&q=" . $q . "&page=";
 else :
-    $posts = $board->getallPosts();
-    $url = "noticeBoard.php?";
-endif; ?>
-
-<? if($mem->getID() === $admin->getID()) :
-    $popup = "memberInfo.php";
-else :
-    $popup = "setPerson.php";
-endif; ?>
+    $url = "noticeBoard.php?page=";
+endif; 
+?>
 
 <?
-$pageCnt = mysqli_num_rows($posts);
-$pageCnt = $pageCnt % PAGESIZE == 0 ? $pageCnt / PAGESIZE : (int)($pageCnt / PAGESIZE) + 1; // Number of Pages
-$page = $page > $pageCnt ? $pageCnt : $page; //Out of range
+$firstArr = $board->searchPosts(0,PAGESIZE,$q, $opt);
+$tempResult = mysqli_fetch_assoc($firstArr['posts']);
+
+$maxPage = $tempResult['count'] % PAGESIZE == 0 ? $tempResult['count'] / PAGESIZE : (int)($tempResult['count'] / PAGESIZE) + 1; // Number of Pages
+$page = $page > $maxPage ? $maxPage : $page; //Out of range
+$start = ($page - 1) * PAGESIZE;
 
 $divStart = (int)(($page - 1) / PAGEDIV);
 $divStart = $divStart * PAGEDIV + 1; //Find div starting page
 
 $divEnd = $divStart + PAGEDIV - 1;
-$divEnd = $divEnd > $pageCnt ?  $pageCnt : $divEnd; //Find div Ending page
+$divEnd = $divEnd > $maxPage ?  $maxPage : $divEnd; //Find div Ending page
 
-$postNum = mysqli_num_rows($posts) - PAGESIZE * ($page - 1); //Post Number`s start value
+$postNum = $tempResult['count'] - $start; //Post Number`s start value
 
-for ($i = 0; $i < ($page - 1) * PAGESIZE; $i++) {
-    $row = mysqli_fetch_assoc($posts);
-}
+$searchArr = $board->searchPosts($start,PAGESIZE,$q,$opt);
 
-$pagePoint = 0;
+$posts = mysqli_fetch_all($searchArr['posts'], MYSQLI_ASSOC);
+$pageCnt = $searchArr['totalCount'];
+?>
+
+<? 
+if ($mem->getID() === $admin->getID()) :
+    $popup = "memberInfo.php";
+else :
+    $popup = "setPerson.php";
+endif; 
 ?>
 
 <!DOCTYPE html>
@@ -70,13 +66,15 @@ $pagePoint = 0;
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <title>Document</title>
-    
+
+    <!-- 상세정보 저장용 팝업 -->
     <script>
-        //상세정보 저장용 팝업
-        function popup() {
+        function popup() 
+        {
             var option = "left=100,top=100,width=500,height=300";
-            window.open("<?=$popup?>", "상세정보저장", option);
+            window.open("<?= $popup ?>", "상세정보저장", option);
         }
     </script>
 </head>
@@ -113,26 +111,26 @@ $pagePoint = 0;
                 </tr>
             </thead>
             <tbody>
-            <!-- 게시글 목록 -->
-                <? while (($row = mysqli_fetch_assoc($posts)) && ($pagePoint++ != PAGESIZE)) :?>
+                <!-- 게시글 목록 -->
+                <? foreach($posts as $post) : ?>
                     <tr>
                         <td><?= $postNum-- ?></td>
                         <td style="text-align: left;">
-                            <a href="viewPost.php?TID=<?= $row['TID'] ?>"><?= $row['Title'] ?></a>
-                            
+                            <a href="viewPost.php?TID=<?= $post['TID'] ?>"><?= $post['Title'] ?></a>
+
                             <!-- admin계정 글삭제 -->
                             <? if ($mem->getID() === $admin->getID()) : ?>
                                 <form action="deletePost.php" method='post' style="display:inline">
-                                    <input type="hidden" name="TID" value=<?= $row['TID'] ?>>
+                                    <input type="hidden" name="TID" value=<?= $post['TID'] ?>>
                                     <input type="submit" value="삭제">
                                 </form>
                             <? endif; ?>
 
                         </td>
-                        <td><?= $row['ID'] ?></td>
-                        <td><?= $row['CreatedDate'] ?></td>
+                        <td><?= $post['ID'] ?></td>
+                        <td><?= $post['CreatedDate'] ?></td>
                     </tr>
-                <? endwhile; ?>
+                <? endforeach; ?>
             </tbody>
         </table>
     </div>
@@ -148,17 +146,6 @@ $pagePoint = 0;
             <input type="search" name="q" style="width: 10%;" required minlength="2" autocomplete="off" value=<?= $q ?>>
             <button>검색</button>
         </form>
-
-        <script>
-            if ("<?= $opt ?>" != "") {
-                var sel = document.getElementById("searchOption");
-                for (var i = 0; i < sel.length; i++) {
-                    if (sel[i].value == "<?= $opt ?>") {
-                        sel[i].selected = true;
-                    }
-                }
-            }
-        </script>
     </div>
 
     <div style="padding-right : 150px; text-align : right; margin-top:5px">
@@ -167,18 +154,24 @@ $pagePoint = 0;
 
     <!-- 페이징 -->
     <div class="page">
-        <a href="<?= $url ?>page=<?= $page - 1 ?>"><-</a>
+        <a href="<?= $url . ($page - 1) ?>"><-</a>
+            <? for ($i = $divStart; $i <= $divEnd; $i++) : ?>
+                <a href="<?= $url . $i ?>" id=<?= $i ?>><?= $i ?></a>
+            <? endfor; ?>
 
-        <? for ($i = $divStart; $i <= $divEnd; $i++) : ?>
-            <? if ($i == $page) : ?>
-                 <a href="<?= $url ?>page=<?= $i ?>" style="color:red"><?= $i ?></a>
-            <? else : ?>
-                <a href="<?= $url ?>page=<?= $i ?>"><?= $i ?></a>
-            <? endif; ?>
-        <? endfor; ?>
-        
-        <a href="<?= $url ?>page=<?= $page + 1 ?>">-></a>
+        <a href="<?= $url . ($page + 1) ?>">-></a>
     </div>
 </body>
+
+
+<script>
+    // 성별 적용
+    if ("<?= $opt ?>" != "") {
+        $('#searchOption').val("<?= $opt ?>").prop("selected", true);
+    }
+
+    // 현재페이지 색상 변경
+    $('#<?= $page ?>').css("color", "red");
+</script>
 
 </html>

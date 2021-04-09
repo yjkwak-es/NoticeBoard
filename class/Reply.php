@@ -15,7 +15,7 @@ class Reply implements ReplyInterface
         endif;
     }
 
-    public function getReply($RID): array
+    public function getReply(int $RID): array
     {
         $query = "SELECT * FROM Reply WHERE RID=?";
         $stmt = mysqli_prepare($this->con, $query);
@@ -27,7 +27,7 @@ class Reply implements ReplyInterface
         return mysqli_fetch_assoc($result);
     }
 
-    public function setReply($RID, $Paragraph): bool
+    public function setReply(int $RID, string $Paragraph): bool
     {
         $query = "UPDATE Reply SET Paragraph = ? WHERE RID = ?";
         $stmt = mysqli_prepare($this->con, $query);
@@ -36,7 +36,7 @@ class Reply implements ReplyInterface
         return mysqli_stmt_execute($stmt);
     }
 
-    public function getallReplysAtPost($TID): mysqli_result
+    public function getallReplysAtPost(int $TID): mysqli_result
     {
         $query = "SELECT * FROM Reply WHERE TID=?";
         $stmt = mysqli_prepare($this->con, $query);
@@ -46,7 +46,7 @@ class Reply implements ReplyInterface
         return mysqli_stmt_get_result($stmt);
     }
 
-    public function createReply($TID, $ID, $Paragraph): bool
+    public function createReply(int $TID, string $ID, string $Paragraph): bool
     {
         $query = "INSERT INTO Reply(TID,ID,Paragraph) VALUES(?,?,?)";
         $stmt = mysqli_prepare($this->con, $query);
@@ -55,7 +55,7 @@ class Reply implements ReplyInterface
         return mysqli_stmt_execute($stmt);
     }
 
-    public function deleteReply($RID): bool
+    public function deleteReply(int $RID): bool
     {
         $query = "DELETE FROM Reply WHERE RID=?";
         $stmt = mysqli_prepare($this->con, $query);
@@ -64,7 +64,7 @@ class Reply implements ReplyInterface
         return mysqli_stmt_execute($stmt);
     }
 
-    public function deleteAllReplyAtPosts($TID): bool
+    public function deleteAllReplyAtPosts(int $TID): bool
     {
         $query = "DELETE FROM Reply WHERE TID=?";
         $stmt = mysqli_prepare($this->con, $query);

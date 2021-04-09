@@ -16,19 +16,7 @@ class TextBoard implements TextBoardInterface
         endif;
     }
 
-    // public function __call($name, $args)
-    // {
-    //     switch ($name) {
-    //         case 'createPost':
-    //             return call_user_func_array(array($this, 'createTextPost'), $args);
-    //         case 'setPost':
-    //             return call_user_func_array(array($this, 'setTextPost'), $args);
-    //         case 'deletePost':
-    //             return call_user_func_array(array($this, 'deleteTextPost'), $args);
-    //     }
-    // }
-
-    public function createTextPost($ID, $Title, $Paragraph): bool
+    public function createTextPost(string $ID, string $Title, string $Paragraph): bool
     {
         return $this->createPost($ID, $Title, $Paragraph, '');
     }
@@ -70,34 +58,62 @@ class TextBoard implements TextBoardInterface
         return mysqli_stmt_execute($stmt);
     }
 
-    public function searchPosts(string $keyword, string $Type = "Title"): mysqli_result
+    public function searchPosts(int $start, int $offset, string $keyword = '', string $Type = '') : array
     {
-        $keyword = "%" . $keyword . "%";
-
-        if ($Type === "all") :
-            $query = "SELECT * FROM board WHERE Title LIKE ? OR Paragraph like ? ORDER BY CreatedDate DESC";
-            $stmt = mysqli_prepare($this->con, $query);
-            $bind = mysqli_stmt_bind_param($stmt, "ss", $keyword, $keyword);
-        elseif ($Type === "Paragraph") :
-            $query = "SELECT * FROM board WHERE Paragraph LIKE ? ORDER BY CreatedDate DESC";
-            $stmt = mysqli_prepare($this->con, $query);
-            $bind = mysqli_stmt_bind_param($stmt, "s", $keyword);
-        else :
-            $query = "SELECT * FROM board WHERE Title LIKE ? ORDER BY CreatedDate DESC";
-            $stmt = mysqli_prepare($this->con, $query);
-            $bind = mysqli_stmt_bind_param($stmt, "s", $keyword);
-        endif;
-
-        $exec = mysqli_stmt_execute($stmt);
-        return mysqli_stmt_get_result($stmt);
-    }
-
-    protected function createPost(string $ID, string $Title, string $Paragraph, string $FileID)
-    {
-        if(empty($FileID)) {
-            $FileID = null;
+        if (isset($keyword)) {
+            $keyword = "%" . $keyword . "%";
         }
 
+        switch ($Type) {
+            case 'all':
+                $query = "SELECT board.*,c.* FROM board,(
+                    SELECT COUNT(*) AS count FROM board WHERE Title LIKE ? OR Paragraph like ? 
+                ) AS c 
+                WHERE Title LIKE ? OR Paragraph like ? ORDER BY CreatedDate DESC LIMIT ?,?";
+                $stmt = mysqli_prepare($this->con, $query);
+                $bind = mysqli_stmt_bind_param($stmt, "ssssii", $keyword, $keyword, $keyword, $keyword, $start, $offset);
+                break;
+
+            case 'Paragraph':
+                $query = "SELECT board.*,c.* FROM board,(
+                    SELECT COUNT(*) AS count FROM board WHERE Paragraph LIKE ? 
+                ) AS c
+                WHERE Paragraph LIKE ? ORDER BY CreatedDate DESC LIMIT ?,?";
+                $stmt = mysqli_prepare($this->con, $query);
+                $bind = mysqli_stmt_bind_param($stmt, "ssii", $keyword, $keyword, $start, $offset);
+                break;
+
+            case 'Title':
+                $query = "SELECT board.*,c.* FROM board,(
+                    SELECT COUNT(*) AS count FROM board WHERE Title LIKE ? 
+                ) AS c
+                 WHERE Title LIKE ? ORDER BY CreatedDate DESC LIMIT ?,?";
+                $stmt = mysqli_prepare($this->con, $query);
+                $bind = mysqli_stmt_bind_param($stmt, "ssii", $keyword, $keyword,$start, $offset);
+                break;
+
+            default:
+                $query = "SELECT board.*,c.* FROM board,(
+                    SELECT COUNT(*) AS count FROM board
+                ) AS c
+                ORDER BY CreatedDate DESC LIMIT ?,?";
+                $stmt = mysqli_prepare($this->con, $query);
+                $bind = mysqli_stmt_bind_param($stmt, "ii", $start, $offset);
+        }
+
+        $exec = mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $cnt = mysqli_num_rows($result);
+
+        return [
+            'posts' => $result,
+            'totalCount' => $cnt       // TODO: 전체행 갯수 가져오기
+        ];
+    }
+
+
+    protected function createPost(string $ID, string $Title, string $Paragraph, $FileID)
+    {
         $query = "INSERT INTO board(ID,Title,Paragraph,FileID) VALUES(?,?,?,?)";
         $stmt = mysqli_prepare($this->con, $query);
 
@@ -107,10 +123,10 @@ class TextBoard implements TextBoardInterface
 
     protected function setPost(int $TID, string $Title, string $Paragraph, string $FileID)
     {
-        if(empty($FileID)) {
+        if (empty($FileID)) {
             $FileID = null;
         }
-        
+
         $query = "UPDATE board SET Title=?,Paragraph=?,FileID=? WHERE TID=?";
         $stmt = mysqli_prepare($this->con, $query);
 
