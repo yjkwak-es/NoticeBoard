@@ -18,18 +18,18 @@ $q = "";
 $opt = "";
 ?>
 
-<? 
+<?
 if (isset($_GET['q'])) :
     $q = $_GET['q'];
     $opt = $_GET['opt'];
     $url = "noticeBoard.php?opt=" . $opt . "&q=" . $q . "&page=";
 else :
     $url = "noticeBoard.php?page=";
-endif; 
+endif;
 ?>
 
 <?
-$firstArr = $board->searchPosts(0,PAGESIZE,$q, $opt);
+$firstArr = $board->searchPosts(0, PAGESIZE, $q, $opt);
 $tempResult = mysqli_fetch_assoc($firstArr['posts']);
 
 $maxPage = $tempResult['count'] % PAGESIZE == 0 ? $tempResult['count'] / PAGESIZE : (int)($tempResult['count'] / PAGESIZE) + 1; // Number of Pages
@@ -44,18 +44,18 @@ $divEnd = $divEnd > $maxPage ?  $maxPage : $divEnd; //Find div Ending page
 
 $postNum = $tempResult['count'] - $start; //Post Number`s start value
 
-$searchArr = $board->searchPosts($start,PAGESIZE,$q,$opt);
+$searchArr = $board->searchPosts($start, PAGESIZE, $q, $opt);
 
 $posts = mysqli_fetch_all($searchArr['posts'], MYSQLI_ASSOC);
 $pageCnt = $searchArr['totalCount'];
 ?>
 
-<? 
+<?
 if ($mem->getID() === $admin->getID()) :
     $popup = "memberInfo.php";
 else :
     $popup = "setPerson.php";
-endif; 
+endif;
 ?>
 
 <!DOCTYPE html>
@@ -71,8 +71,7 @@ endif;
 
     <!-- 상세정보 저장용 팝업 -->
     <script>
-        function popup() 
-        {
+        function popup() {
             var option = "left=100,top=100,width=500,height=300";
             window.open("<?= $popup ?>", "상세정보저장", option);
         }
@@ -112,7 +111,7 @@ endif;
             </thead>
             <tbody>
                 <!-- 게시글 목록 -->
-                <? foreach($posts as $post) : ?>
+                <? foreach ($posts as $post) : ?>
                     <tr>
                         <td><?= $postNum-- ?></td>
                         <td style="text-align: left;">
@@ -155,9 +154,10 @@ endif;
     <!-- 페이징 -->
     <div class="page">
         <a href="<?= $url . ($page - 1) ?>"><-</a>
-            <? for ($i = $divStart; $i <= $divEnd; $i++) : ?>
-                <a href="<?= $url . $i ?>" id=<?= $i ?>><?= $i ?></a>
-            <? endfor; ?>
+        
+        <? for ($i = $divStart; $i <= $divEnd; $i++) : ?>
+            <a href="<?= $url . $i ?>" id=<?= $i ?>><?= $i ?></a>
+        <? endfor; ?>
 
         <a href="<?= $url . ($page + 1) ?>">-></a>
     </div>

@@ -52,8 +52,7 @@ class TextBoard implements TextBoardInterface
         $reply->deleteAllReplyAtPosts($TID);
 
         $query = "DELETE FROM board WHERE TID=?";
-        $stmt = mysqli_stmt_init($this->con);
-        mysqli_stmt_prepare($stmt, $query);
+        $stmt = mysqli_prepare($this->con, $query);
         $bind = mysqli_stmt_bind_param($stmt, "i", $TID);
         return mysqli_stmt_execute($stmt);
     }

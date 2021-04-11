@@ -73,6 +73,7 @@ $age = isset($row['age']) ? $row['age'] : "";
             $(this).val($(this).val().replace(replaceChar, ""));
         });
     })
+    
     //나이 : 숫자 외 입력제한
     var replaceNotInt = /[^0-9]/gi;
     $(document).ready(function() {

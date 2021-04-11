@@ -8,12 +8,14 @@ $RID = $_POST['RID'];
         alert('error : reply delete')
         history.go(-1)
     <? endif; ?>
+</script>
 
-    <?
-    $reply = new Reply();
-    $result = $reply->deleteReply($RID);
-    ?>
+<?
+$reply = new Reply();
+$result = $reply->deleteReply($RID);
+?>
 
+<script>
     <? if ($result) : ?>
         alert('Reply Deleted!')
     <? else : ?>

@@ -17,7 +17,8 @@ $TID = $_GET['TID'];
 $row = $board->getPost($TID);
 
 $replyResult = $reply->getallReplysAtPost($row['TID']);
-$replyRow = mysqli_fetch_all($replyResult, MYSQLI_ASSOC);
+$replyRow = mysqli_fetch_all($replyResult['result'], MYSQLI_ASSOC);
+$replyCount = $replyResult['totalCount'];
 ?>
 
 <!DOCTYPE html>
@@ -91,7 +92,7 @@ $replyRow = mysqli_fetch_all($replyResult, MYSQLI_ASSOC);
 
     <!-- 댓글목록 -->
     <div class="Reply">
-        <? if (mysqli_num_rows($replyResult)) : ?>
+        <? if ($replyResult['totalCount'] != 0) : ?>
             <table id="replyTable">
                 <colgroup>
                     <col width="10%" />

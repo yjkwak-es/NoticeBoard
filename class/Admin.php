@@ -1,7 +1,7 @@
 <?php
 
-include_once __DIR__."/Member.php";
-include_once __DIR__."/AdminInterface.php";
+include_once __DIR__ . "/Member.php";
+include_once __DIR__ . "/AdminInterface.php";
 
 class Admin extends Member implements AdminInterface
 {
@@ -30,12 +30,12 @@ class Admin extends Member implements AdminInterface
         return $result;
     }
 
-    public function getMemberID(string $id) : array
+    public function getMemberID(string $id): array
     {
         return $this->getMember($id);
     }
 
-    public function createMember(string $id, string $pw) : bool
+    public function createMember(string $id, string $pw): bool
     {
         $query = "SELECT COUNT(*) FROM test_db WHERE ID = ?";
         $stmt = mysqli_prepare($this->con, $query);
@@ -44,7 +44,7 @@ class Admin extends Member implements AdminInterface
         $exec = mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
         $row = $result->fetch_row();
-        
+
         if ($row[0] != 0) {
             return false;
         }

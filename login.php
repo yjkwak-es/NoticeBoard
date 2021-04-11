@@ -26,12 +26,13 @@ $admin = new admin();
 $row = $admin->getMemberID($ID);
 ?>
 
-<? if ($row['PW'] != $PW) : ?>
-    <script>
+
+<script>
+    <? if ($row['PW'] != $PW) : ?>
         alert('PW Incorrect')
         history.go(-1)
-    </script>
-<? endif; ?>
+    <? endif; ?>
+</script>
 
 <?
 session_start();

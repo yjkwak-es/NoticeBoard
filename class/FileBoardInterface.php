@@ -1,5 +1,5 @@
 <?php
-include_once __DIR__."/TextBoardinterface.php";
+include_once __DIR__ . "/TextBoardinterface.php";
 
 interface FileBoardIneterface
 {

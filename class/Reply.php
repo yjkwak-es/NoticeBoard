@@ -1,5 +1,5 @@
 <?php
-include_once __DIR__."/ReplyInterface.php";
+include_once __DIR__ . "/ReplyInterface.php";
 
 class Reply implements ReplyInterface
 {
@@ -23,7 +23,7 @@ class Reply implements ReplyInterface
         $bind = mysqli_stmt_bind_param($stmt, "i", $RID);
         $exec = mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
-        
+
         return mysqli_fetch_assoc($result);
     }
 
@@ -36,14 +36,18 @@ class Reply implements ReplyInterface
         return mysqli_stmt_execute($stmt);
     }
 
-    public function getallReplysAtPost(int $TID): mysqli_result
+    public function getallReplysAtPost(int $TID): array
     {
         $query = "SELECT * FROM Reply WHERE TID=?";
         $stmt = mysqli_prepare($this->con, $query);
 
         $bind = mysqli_stmt_bind_param($stmt, "i", $TID);
         $exec = mysqli_stmt_execute($stmt);
-        return mysqli_stmt_get_result($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        return [
+            'result' => $result,
+            'totalCount' => mysqli_num_rows($result)
+        ];
     }
 
     public function createReply(int $TID, string $ID, string $Paragraph): bool

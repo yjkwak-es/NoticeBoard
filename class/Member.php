@@ -6,7 +6,7 @@ class Member implements MemberInterface
     protected string $id;
     protected $con;
 
-    public function __construct(string $id='')
+    public function __construct(string $id = '')
     {
         $this->id = $id;
         $this->con = mysqli_connect("localhost", "root", "mysqlpassword", "guidb");
@@ -17,12 +17,12 @@ class Member implements MemberInterface
         endif;
     }
 
-    public function getMemberMy() : array
+    public function getMemberMy(): array
     {
         return $this->getMember($this->id);
     }
 
-    public function setMember(string $name, int $age, string $gender) : bool
+    public function setMember(string $name, int $age, string $gender): bool
     {
         $query = "UPDATE test_db SET name=?, age=?, gender=? WHERE ID=?";
         $stmt = mysqli_prepare($this->con, $query);
@@ -32,7 +32,7 @@ class Member implements MemberInterface
         return $exec;
     }
 
-    public function getID() : string
+    public function getID(): string
     {
         return $this->id;
     }
@@ -42,7 +42,7 @@ class Member implements MemberInterface
         $this->id = $id;
     }
 
-    protected function getMember($id) : array
+    protected function getMember($id): array
     {
         $query = "SELECT * FROM test_db WHERE ID=?";
         $stmt = mysqli_prepare($this->con, $query);

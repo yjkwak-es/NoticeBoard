@@ -4,6 +4,8 @@ include_once __DIR__ . "/FileBoardInterface.php";
 
 class FileBoard extends TextBoard implements FileBoardIneterface
 {
+    public $uploads_dir = 'uploads/';
+
     public function createFilePost(string $ID, string $Title, string $Paragraph, array $file): bool
     {
         $file_id = $this->uploadFile($file);
@@ -31,11 +33,11 @@ class FileBoard extends TextBoard implements FileBoardIneterface
     public function clearFile(int $TID): bool
     {
         $fileResult = $this->getPost($TID);
-        
+
         if (empty($fileResult['FileID'])) :
             return true;
         endif;
-        
+
         $this->setPost($TID, $fileResult['Title'], $fileResult['Paragraph'], '');
         return $this->deleteFile($fileResult['FileID']);
     }
@@ -51,8 +53,7 @@ class FileBoard extends TextBoard implements FileBoardIneterface
         $name_orig = $row['name_orig'];
         $name_save = $row['name_save'];
 
-        $uploads_dir = 'uploads/';
-        $path = $uploads_dir . $name_save;
+        $path = $this->uploads_dir . $name_save;
         $length = filesize($path);
 
         header("Content-Type: application/octet-stream");
@@ -82,8 +83,7 @@ class FileBoard extends TextBoard implements FileBoardIneterface
     {
         $row = $this->getFile($FileID);
 
-        $uploads_dir = 'uploads/';
-        unlink($uploads_dir . $row['name_save']);
+        unlink($this->uploads_dir . $row['name_save']);
 
         $query = "DELETE FROM file WHERE FileID= ?";
         $stmt = mysqli_stmt_init($this->con);
@@ -98,11 +98,9 @@ class FileBoard extends TextBoard implements FileBoardIneterface
             return NULL;
         endif;
 
-        $uploads_dir = 'uploads/';
         $allowed_ext = array('jpg', 'jpeg', 'png', 'gif');
 
         $max_file_size = 5242880;
-        $name = $_FILES['upfile']['name'];
         $ext = substr($file['name'], strrpos($file['name'], '.') + 1);
 
         if ((!in_array($ext, $allowed_ext)) || ($file['size'] >= $max_file_size)) :
@@ -110,14 +108,13 @@ class FileBoard extends TextBoard implements FileBoardIneterface
         endif;
 
         $path = md5(microtime()) . '.' . $ext;
-        if (move_uploaded_file($file['tmp_name'], $uploads_dir . $path)) :
-            $con = mysqli_connect("localhost", "root", "mysqlpassword", "guidb");
-            $query = "INSERT INTO file(FileID, name_orig, name_save, reg_time) VALUES(?,?,?,now())";
+        if (move_uploaded_file($file['tmp_name'], $this->uploads_dir . $path)) :
+            $query = "INSERT INTO file(FileID, name_orig, name_save) VALUES(?,?,?)";
             $file_id = md5(uniqid(rand(), true));
             $name_orig = $file['name'];
             $name_save = $path;
 
-            $stmt = mysqli_prepare($con, $query);
+            $stmt = mysqli_prepare($this->con, $query);
             $bind = mysqli_stmt_bind_param($stmt, "sss", $file_id, $name_orig, $name_save);
             $exec = mysqli_stmt_execute($stmt);
 
